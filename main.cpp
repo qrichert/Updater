@@ -17,13 +17,8 @@ along with Multiuso.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <QApplication>
-#include <QTranslator>
-#include <QLocale>
-#include <QLibraryInfo>
-#include <QIcon>
+#include <QtCore>
 #include "../Multiuso/Multiuso.h"
-#include "FenPrincipale.h"
 
 int main(int argc, char *argv[])
 {
@@ -31,13 +26,6 @@ int main(int argc, char *argv[])
 	
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 	
-	QCoreApplication::setApplicationName("Multiuso - Updater");
-	QCoreApplication::setApplicationVersion("1.0.0");
-	QCoreApplication::setOrganizationName("Quentin RICHERT");
-	QCoreApplication::setOrganizationDomain("http://multiuso.olympe-network.com/");
-
-	QApplication::setQuitOnLastWindowClosed(false);
-
 	QString locale = QLocale::system().name();
 
 	QTranslator translator;
@@ -45,8 +33,17 @@ int main(int argc, char *argv[])
 
 		app.installTranslator(&translator);
 
-	FenPrincipale fenetre;
-		fenetre.show();
+	if (argc <= 1)
+		return EXIT_SUCCESS;
 
-	return app.exec();
+	QString path = argv[1];
+
+		QFile::remove(path + "/Multiuso" + Multiuso::currentSuffix()); // Old version
+
+		QFile::copy(Multiuso::appDirPath("Updater") + "/Multiuso" + Multiuso::currentSuffix(), // New version
+				path + "/Multiuso" + Multiuso::currentSuffix());
+
+		QProcess::startDetached(path + "/Multiuso" + Multiuso::currentSuffix());
+
+	return EXIT_SUCCESS;;
 }
